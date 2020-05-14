@@ -1,0 +1,24 @@
+[submodule "experiments/third_party/etl"]
+	path = experiments/third_party/etl
+	url = https://github.com/ETLCPP/etl.git
+[submodule "experiments/third_party/folly"]
+	path = experiments/third_party/folly
+	url = https://github.com/facebook/folly.git
+[submodule "experiments/third_party/basicpp17"]
+	path = experiments/third_party/basicpp17
+	url = https://github.com/basicpp17/basicpp17.git
+[submodule "experiments/third_party/EASTL"]
+	path = experiments/third_party/EASTL
+	url = https://github.com/electronicarts/EASTL.git
+[submodule "experiments/third_party/hana"]
+	path = experiments/third_party/boost_hana
+	url = https://github.com/boostorg/hana.git
+[submodule "experiments/third_party/mpl"]
+	path = experiments/third_party/kvasir_mpl
+	url = https://github.com/kvasir-io/mpl.git
+[submodule "experiments/third_party/mapbox_variant"]
+	path = experiments/third_party/mapbox_variant
+	url = https://github.com/mapbox/variant
+[submodule "experiments/third_party/mpark_variant"]
+	path = experiments/third_party/mpark_variant
+	url = https://github.com/mpark/variant

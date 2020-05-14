@@ -1,0 +1,10 @@
+
+cd /mnt/m/ug/CPP-Dresden/2020-05_FastMeta/experiments
+
+time qbs build -d /tmp/experiments.build-clang -j 10 profile:clang-9 -p "002 - Conditional"
+time qbs build -d /tmp/experiments.build-clang -j 10 profile:clang-10 -p "002 - Conditional"
+
+time qbs build -d /tmp/experiments.build-gcc -j 10 profile:gcc-9 -p "002 - Conditional"
+time qbs build -d /tmp/experiments.build-gcc -j 10 profile:gcc-10 -p "002 - Conditional"
+
+explorer \\wsl$\Ubuntu-18.04\tmp

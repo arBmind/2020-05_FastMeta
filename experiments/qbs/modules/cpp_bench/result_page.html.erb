@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="d3.js"></script>
+  <script src="cpp_chart.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      font-family: "Roboto", "sans-serif"
+    }
+    ul {
+      margin: 0;
+    }
+    .dataPoint:hover {
+      stroke: black;
+    }
+    .tooltip {
+      position: absolute;
+      z-index: 10000;
+      background-color: white;
+      border: solid 2px black;
+      border-radius: 5px;
+      padding: 5px;
+    }
+    .sampleChart, .valueChart {
+      position: relative;
+    }
+    .graphLabel {
+      font-size: 12px;
+      font-family: "Input mono", "Firas Code", "mono";
+    }
+  </style>
+</head>
+
+<body>
+  <h1><%= options.headline %></h1>
+  <p><%= options.description %></p>
+  <%
+opts = ""
+opts += " data-show-groups='#{options.showGroups.join(',')}'" unless options.showGroups.empty?
+opts += " data-hide-groups='#{options.hideGroups.join(',')}'" unless options.hideGroups.empty?
+  %>
+  <div class="sampleChart" data-var="<%= options.dataVar %>" data-key="time" data-label="Time [s]"<%= opts %>></div>
+  <div class="sampleChart" data-var="<%= options.dataVar %>" data-key="ram" data-label="Peak Ram [kb]"<%= opts %>></div>
+  <div class="valueChart" data-var="<%= options.dataVar %>" data-key="lineCount" data-label="AST Line Count"<%= opts %>></div>
+  <script>
+    var <%= options.dataVar %> = <%= JSON.pretty_generate data, object_nl: "\n    ", array_nl: "\n    " %>;
+  </script>
+</body>
+
+</html>

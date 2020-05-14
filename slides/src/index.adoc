@@ -1,0 +1,1131 @@
+= Faster ►► C++: Meta-Programming
+:author: Andreas Reischuck
+:twitter: @arBmind
+:!avatar: andreas.png
+:!organization: HicknHack Software GmbH
+:!sectids:
+:imagesdir: images
+:icons: font
+:use-link-attrs:
+:title-separator: :
+:codedir: code
+:data-uri:
+:docinfo2:
+
+*C++UG Dresden 2020*
+
+[.cue]
+****
+Welcome
+
+Let me start with a story from a different time.
+Earlier this year… Even earlier, two years ago.
+I gave a lecture near Frankfurt Main.
+A group of attendees came all the way from Hamburg.
+The room was crammed.
+On the last day, the group from Hamburg left early to catch the train home.
+But they got stuck, because of a storm.
+I felt lucky because I arrived in Dresden with minor delays.
+
+It seems they enjoyed my lecture so I was invited to Hamburg earlier this year.
+And you might guessed it, I got stuck because of a storm.
+
+So what's the moral: Enjoy what you have.
+
+Back to the topic…
+
+Do you have issues with your C++ compiler getting stuck in a storm?
+C++ projects always seem to compile slow.
+There might be different reasons for that.
+One might be meta programming.
+****
+
+[.subtitle]
+== Meta Programming
+
+What is it?
+
+
+[.cue]
+****
+What is your definition of it?
+
+I give you a minute to think about it.
+
+…
+
+I wont cite Wikipedia here…
+Let's look at some code:
+****
+
+[.source]
+== Generic Types
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+// nest++
+using IntVec = std::vector<int>;
+// nest--
+
+// nest++
+using IntAndFloat = std::tuple<int, float>;
+// nest--
+
+// nest++
+using IntOrFloat = std::variant<int, float>;
+// nest--
+----
+--
+
+[.cue]
+****
+Is this meta programming yet?
+
+Let's look at an example…
+****
+
+[.source]
+== Generic Algorithms
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+template<class It, class Value>
+auto find(It b, It e, const Value&) -> It;
+
+// nest++
+auto vec = IntVec{1, 2, 3};
+// nest--
+// nest++
+auto it = find(vec.begin(), vec.end(), 2);
+// nest--
+----
+--
+
+
+[.cue]
+****
+Looks like regular code…
+
+But with higher abstractions.
+Clearly someone is doing meta programming.
+This example is using it.
+
+But for the compiler the usage is the hard part.
+It has to flesh out the templates and create real types and code.
+
+…Pause…
+****
+
+== Motivations
+
+[%build]
+* Fast to write
+* Fast to understand
+* Fast to run
+* Fast to compile
+
+[.cue]
+****
+Why are developers attracted to meta programming like flies to a cake?
+
+We want to go fast…
+****
+
+[.subtitle]
+== Fast to compile
+
+[.cue]
+****
+So my talk today focusses on the fast to compile part.
+
+What does fast mean?
+How do we get anything fast?
+****
+
+== Measure!
+
+[.cue]
+****
+Time depends on the perception.
+
+So we have to measue it or we cannot track our progress.
+
+How do we do that for meta programming?
+****
+
+== Time-Trace
+
+`clang -ftime-trace`
+
+[%build]
+* Clang >=9
+* Visualized in Chrome
+
+[.cue]
+****
+Let the compiler measure it.
+
+Clang 9 supports a very neat method.
+You compile your code with the time-trace option.
+And you get a json file out of it. Be aware this might be huge.
+1 Minute compile time result in 100 megabytes of json file.
+You can use Chrome or other tools to visualize it.
+****
+
+== !
+
+image::single_file.gif[role="center", width="800"]
+
+[.cue]
+****
+Very cool feature.
+****
+
+== AST-Print
+
+`clang -Xclang -ast-print -fsyntax-only`
+
+[%build]
+* Code seen by Compiler
+* All template instantiations
+
+[.cue]
+****
+An often overlooked feature that clang provides is AST printing.
+
+You can see your C++ code like the compiler sees it.
+With all the templates instantiated.
+
+Expect these files to be huge as well.
+The compiler might take time but it's for sure not lazy.
+****
+
+== Metashell
+
+http://metashell.org/
+
+[%build]
+* Clang based interactive shell
+
+[.cue]
+****
+For step by step debugging and analysis of meta programs metashell is the tool to got to.
+
+It also supports timings.
+
+I suggest you give it a try if have not already.
+****
+
+== Metabench
+
+http://metaben.ch
+
+[%build]
+* started by Louis Dionne for Hana
+* GCC, Clang, MSVC
+* requires CMake + Ruby
+
+[.cue]
+****
+Louis Dionne did not start the faster meta programming movement.
+But Hana was a huge leap forward.
+
+It was faster and better to read than most frameworks at it's time.
+
+And Louis provided open source benchmarks.
+Others joined the competition.
+
+The range of benchmarks might be limited to some essential primitives.
+But Metabench can be used to measure much more.
+****
+
+== Tools
+
+[%build]
+* Time-Trace
+* AST-Print
+* Metashell
+* Metabench
+
+[.cue]
+****
+This sums up the list of tools.
+Any questions so far?
+Hints to other tools for our toolbox?
+
+So… Let's dig deeper!
+****
+
+[.subtitle]
+== Dig Deeper
+
+[.cue]
+****
+We have a project that heavily relies on meta programming.
+Compile Times start to suffer.
+
+So I wanted to dig deeper and see how current compilers behave.
+A good introduction is to… Compare two types.
+****
+
+== Compare two types
+
+[.cue]
+****
+It comes up surprisingly often.
+For example if you want to look if a type is part of a tuple.
+The implemenation compares the candidate against all types of the tuple.
+
+Fortunatly the STL has this topic covered…
+****
+
+[.source]
+== STL usage
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+// nest++
+static_assert(std::is_same<int, int>::value);
+// nest--
+// nest++
+static_assert(!std::is_same_v<int, float>);
+// nest--
+----
+--
+
+[.cue]
+****
+The std::is_same type trait was introduced in C++11.
+
+Since C++17 you can write std::is_same_v.
+
+But how is this implemented?
+****
+
+[.source]
+== !
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+template<class, class>
+struct is_same : false_type {};
+
+// nest++
+template<class T>
+struct is_same<T, T> : true_type {};
+// nest--
+
+// nest++
+template<class A, class B> constexpr 
+  auto is_same_v = is_same<A, B>::value;
+// nest--
+----
+--
+
+[.cue]
+****
+The most simple version is a templated struct with two type arguments.
+By default we inherit false_type.
+
+false_type is part of the STL. Basically when you convert it to bool it's false.
+So we save use time to write the conversion here.
+
+Now we have a 50% working is_same.
+To get the true case we specialize both template type arguments to the same type.
+And we have 100%.
+
+The C++17 is_same_v is just a compile time constant, where we extract the value.
+
+Questions so far on how this works?
+
+Now what might be an issue here?
+****
+
+== Issues
+
+[%build]
+* Template struct instantiations
+* For all pairs of types
+
+[.cue]
+****
+We create an full struct for each template instantiation.
+This is a new type to the compiler.
+
+And we do this for every type combination that we compare.
+As I said for the tuple we will do this a lot.
+
+Now we need ideas to fix that.
+****
+
+== 1. Idea
+
+[%build]
+* templated constexpr variable
+* with template specialisation
+
+[.cue]
+****
+My first idea is not new.
+But I did not know that constexpr variable can be specialized as well.
+
+Let's see the code.
+****
+
+[.source]
+== !
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+template<class, class> constexpr
+  auto is_same = false;
+
+// nest++
+template<class T> constexpr
+  auto is_same<T, T> = true;
+// nest--
+----
+--
+
+[.cue]
+****
+The 50% case is simply the templated constexpr variable with false again.
+
+Now we specialize it like the struct.
+
+This looks simpler to me.
+And does not create a new struct instance for all type combinations.
+But still…
+a compile time global variable is introduced for all type combinations.
+
+So we need an even better idea.
+I found one by Jorg Brown.
+****
+
+== Jorg Brown (CppCon 2019)
+
+[.build]
+--
+[.build]
+“Reducing Template Compilation Overhead, Using C++11, 14, 17, and 20.”
+
+[.build]
+https://www.youtube.com/watch?v=TyiiNVA1syk
+--
+
+[.cue]
+****
+He gave a nice talk last year at CppCon.
+
+"Reducing Template Compilation Overhead using all kinds of C++ versions."
+
+After half of the talk he showed this code:
+****
+
+[.source]
+== Wrapper (Slide 44/61)
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+template<class T>
+struct Wrapper {
+  // nest++
+  static constexpr 
+    bool IsSame(Wrapper<T>*) { return true; }
+  // nest--
+  // nest++
+  static constexpr
+    bool IsSame(void*) { return false; }
+  // nest--
+};
+// nest++
+static_assert(
+  Wrapper<int>::IsSame((Wrapper<int>*)(nullptr)));
+// nest--
+----
+--
+
+[.cue]
+****
+We create a Wrapper struct for one type.
+And implement two methods.
+
+One accepts a pointer to the wrapped type and returns true.
+
+The other uses a void pointer and returns false.
+
+With this we only create one struct for each type and not for all combinations.
+This should save a lot of work for the compiler.
+
+Two slides later …
+****
+
+[.source.s67x16]
+== Wrapper with Base (Slide 46/61)
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+// nest++
+struct WrapperBase {
+  static constexpr bool IsSame(void*) { return false; }
+};
+// nest--
+// nest++
+template<class T>
+struct Wrapper : WrapperBase {
+  // nest++
+  static constexpr 
+    bool IsSame(Wrapper<T>*) { return true; }
+  // nest--
+  // nest++
+  using WrapperBase::IsSame;
+  // nest--
+};
+// nest--
+
+// nest++
+template<class A, class B>
+using is_same = std::integral_constant<bool, 
+    Wrapper<A>::IsSame((Wrapper<B>*)(nullptr))>;
+// nest--
+----
+--
+
+[.cue]
+****
+Jorg proposed to use a common base class for the false case.
+So you add this to our overload set.
+
+And we can mimick the std::is_same api by introducing a type alias again.
+At the first glimpse it introduces the instances for all type combinations again.
+But remember that using is just a type alias.
+And aliases should always be cheap.
+
+Questions?
+****
+
+== More Ideas?
+
+[.cue]
+****
+I had to take some holidays lately.
+Because of the global pandemic, I was stuck at home.
+So I had some time to think about this.
+
+The first idea was inspired by Jorgs approach.
+If we can use pointers, why not just use pointers?
+****
+
+[.source]
+== Just Pointer
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+// nest++
+template<class T> using PtrTo = T*;
+// nest--
+
+// nest++
+template<class T> constexpr 
+  auto is_same(T*, T*) { return true; }
+// nest--
+// nest++
+constexpr
+  auto is_same(...) { return false; }
+// nest--
+
+// nest++
+static_assert(is_same(PtrTo<int>{}, PtrTo<int>{}));
+// nest--
+----
+--
+
+[.cue]
+****
+When we have to pointers to the same type we are happy.
+Otherwise we convert them to void pointer and decline.
+
+Seems simple and fast, doesn't it?
+But we have a downside here.
+
+We cannot cope with references!
+
+So to fix that easily we need a wrapper again.
+****
+
+[.source]
+== Pointer to Type Pointers
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+// nest++
+template<class T> struct Type;
+// nest--
+// nest++
+template<class T> constexpr 
+  auto type = (Type<T>*)(nullptr);
+// nest--
+
+// nest++
+constexpr bool same(const void* a, const void* b) { 
+  return a == b;
+}
+// nest--
+
+// nest++
+static_assert(same(&type<int>, &type<int>));
+// nest--
+----
+--
+
+[.cue]
+****
+Let's start by using a templated forward declared struct Type.
+This can wrap any type.
+
+A constexpr variable creates a new global variable for each type.
+So we can just compare the pointers to this variable.
+
+And voila! This works! At least in clang and msvc.
+****
+
+== Which strategy is best?
+
+[%build]
+* STL: [language-cpp]#`struct is_same<T, T>`#
+* Variable: [language-cpp]#`auto is_same_v<T, T>`#
+* Wrapper: [language-cpp]#`Wrapper<T>::IsSame(Wrapper<T>*)`#
+* WrapperBase
+* Pointer: [language-cpp]#`is_same(T*, T*)`#
+* Type Pointer: [language-cpp]#`same(&type<T>, &type<T>)`#
+
+[.cue]
+****
+So what's the best strategy to compare two types?
+****
+
+[.subtitle]
+== Benchmarks
+
+[.cue]
+****
+So we have to measure.
+
+To easily compare our stategies, we could use metabench.
+****
+
+== Efforts for Metabench
+
+[%build]
+* Write `cpp.erb`
+* CMake [language-cmake]#`metabench_add_dataset()`#
+* CMake [language-cmake]#`metabench_add_chart()`#
+* Run with CMake
+
+[.cue]
+****
+I did that.
+Created a working implementation for all strategies.
+Transformed them into an Ruby ERB template.
+And created cmake datasets and summed up chart.
+But this got very slow.
+
+For all changes all benchmarks are run again.
+So I invested some time into building a better benchmark.
+****
+
+== Qbs module cpp_bench
+
+[.badge]
+--
+New
+--
+
+[%build]
+* [language-qml]#`Depends { name: "cpp_bench" }`#
+* configure [language-qml]#`cpp_bench.inputNumber: []`#
+* add cpp-file
+* build only changed files
+
+[.cue]
+****
+It's very easy to use.
+And only compiles new or changed code files.
+
+I also improved the statistics a bit.
+* Measure compile time with syntax only.
+* Measure ram usage
+* Count the lines of the AST-Printer
+****
+
+== Results
+
+[.cue]
+****
+Let's look at some interactive charts:
+****
+
+include::001-same-clang-9.adoc[]
+
+include::001-same-vs2019.adoc[]
+
+== Conclusion
+
+[%build]
+* Never underestimate STL
+* crazy ideas might help
+
+[.cue]
+****
+What a ride!
+
+Questions?
+
+Motivated by the results I investigated some other primitives.
+****
+
+[.subtitle]
+== Conditional Type
+
+[.cue]
+****
+Let's focus on a conditional type.
+If a condition ist true, we want type A and if it's not type B.
+
+Again the STL has us covered here.
+Let's look at some code.
+****
+
+[.source]
+== !
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+// nest++
+using X = conditional_t<true, int, float>;
+// nest--
+// nest++
+static_assert(std::is_same_v<X, int>);
+// nest--
+
+// nest++
+using Y = conditional_t<false, int, float>;
+// nest--
+// nest++
+static_assert(std::is_same_v<Y, float>);
+// nest--
+----
+--
+
+[.cue]
+****
+The type alias X should be int because the condition ist true.
+
+And Y should be an alias to type float, because the condition is false.
+
+That's basically the specification.
+
+How would we implement this?
+****
+
+[.source.s67x16]
+== !
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+template<bool Cond, class Then, class Else>
+// nest++
+using conditional_t =
+// nest--
+// nest++
+    typename Conditional<Cond, Then, Else>::type;
+// nest--
+
+// nest++
+template<bool Cond, class Then, class Else>
+struct Conditional {
+// nest++
+    using type = Then;
+// nest--
+};
+// nest--
+// nest++
+template<class Then, class Else>
+struct Conditional<false, Then, Else> {
+// nest++
+    using type = Else;
+// nest--
+};
+// nest--
+----
+--
+
+[.cue]
+****
+We have a template with a bool and two types as arguments.
+For the implemenation we use a struct that has a member type alias with the corret type.
+
+By default we give back the Then type.
+
+And when we specialize on false we give back the Else type.
+
+Looks doable…
+
+What might be slow?
+Can we improve it? How?
+- we have too many stuct instantiations.
+****
+
+[.source.s54x13]
+== !
+
+[.build]
+--
+[source.lang-cpp%nested, cpp]
+----
+template<bool Cond> struct Conditional;
+
+// nest++
+template<> struct Conditional<true> {
+    // nest++
+    template<class Then, class>
+    using type = Then;
+    // nest--
+};
+// nest--
+
+// nest++
+template<> struct Conditional<false> {
+    // nest++
+    template<class, class Else>
+    using type = Else;
+    // nest--
+};
+// nest--
+----
+--
+
+[.cue]
+****
+I don't know who had the idea.
+But we can seperate the template arguments.
+
+So the conditional only get's the bool.
+The true specialisation now contains a member template for type.
+That basically returns the first template type argument.
+
+The false specialisation returns the second type argument.
+
+This should reduce the amount of template instantiations.
+****
+
+== Conditional Benchmark Results
+
+[.cue]
+****
+I tried more ideas, but with no good results…
+
+Let's look at the results.
+****
+
+include::002-conditional-clang-9.adoc[]
+
+include::002-conditional-vs2019.adoc[]
+
+== Conclusion
+
+[%build]
+* benchmark all the things!
+* compilers change over time
+
+[.cue]
+****
+Kind of unexpected…
+
+I guess you get the gist of it.
+
+Now let's go more into the "real" world.
+****
+
+[.subtitle]
+== Containers
+
+[.cue]
+****
+And review some containers.
+
+Let us start with the favorite C++ container:
+the Vector.
+****
+
+== Vector Contenders
+
+[%build]
+* STL: [language-cpp]#`std::vector<T, Allocator>`#
+* ETL: [language-cpp]#`etl::vector<T, Size>`#
+* Folly: [language-cpp]#`folly::fbvector<T, Allocator>`#
+* EASTL: [language-cpp]#`eastl::vector<T, Allocator>`#
+* Co-Cpp19: [language-cpp]#`array19::DynamicArrayOf<T>`#
+
+[.cue]
+****
+There are a lot of contenders out there.
+
+STL is our baseline.
+ETL - embedded template library with a maximum size.
+Folly - The standard library from Facebook. Big focus on speed.
+EASTL - EA Studio standard template library replacement for games.
+Co-Cpp19 - My own experimental attempt.
+****
+
+== Vector Benchmark Results
+
+[.cue]
+****
+Here are the graphs again…
+****
+
+include::010-vector-clang-9.adoc[]
+
+include::010-vector-vs2019.adoc[]
+
+== Map Contenders
+
+[%build]
+* STL: [language-cpp]#`std::map<K, V, Compare, Allocator>`#
+//* STL: [language-cpp]#`std::multi_map<K, V, Allocator>`#
+//* STL: [language-cpp]#`std::unordered_map<K, V, Allocator>`#
+* ETL: [language-cpp]#`etl::flat_map<K, V, Size, Compare>`#
+* Folly: [language-cpp]#`folly::sorted_vector_map<K, V, C, A, G, Cont>`#
+* EASTL: [language-cpp]#`eastl::vector_map<K, V, Comp, Alloc, Cont>`#
+
+[.cue]
+****
+Without further introduction my second favorite container.
+It's not the fastest, but has very important traits.
+
+Same libraries as before…
+****
+
+include::011-map-clang-9.adoc[]
+
+include::011-map-vs2019.adoc[]
+
+== Conclusion
+
+[%build]
+* complex containers take time
+* simplified containers compile faster
+
+[.cue]
+****
+I was surprised to find that containers are not as slow as expected.
+But I guess we use syntax only. Needs more investigation.
+
+Return to a more meta programming.
+****
+
+[.subtitle]
+== Tuple
+
+[.cue]
+****
+A Tuple basically replaces a struct.
+But it allows use to skip giving all fields names.
+
+So it stores all the given types.
+****
+
+== Tuple Contenders
+
+[%build]
+* STL: [language-cpp]#`std::tuple<T...>`#
+* EASTL: [language-cpp]#`eastl::tuple<T...>`#
+* Hana: [language-cpp]#`boost::hana::tuple<T...>`#
+* Basicpp: [language-cpp]#`tuple17::Tuple<T...>`#
+* Co-Cpp19: [language-cpp]#`tuple19::Tuple<T...>`#
+
+[.cue]
+****
+This is the domain of Boost Hana.
+
+We created a custom implementation.
+Because we needed to retrieve the offsets for each member.
+
+And now I created a new Co-Cpp19 implementation, that is optimized to compile faster.
+****
+
+include::020-tuple-clang-9.adoc[]
+
+include::020-tuple-vs2019.adoc[]
+
+include::021-tuple-visit-clang-9.adoc[]
+
+include::021-tuple-visit-vs2019.adoc[]
+
+== Conclusion
+
+[%build]
+* [language-cpp]#`std::tuple`# kinda slow
+* Features might be expensive!
+* Opinionated implementation much faster
+
+[.cue]
+****
+
+As the last topic we focus on…
+****
+
+[.subtitle]
+== Variant
+
+[.cue]
+****
+Variant stores one of the given types and also remembers which type is used.
+So it's like a union plus an index.
+****
+
+== Variant Contenders
+
+[%build]
+* STL: [language-cpp]#`std::variant<T...>`#
+* EASTL: [language-cpp]#`eastl::variant<T...>`#
+* Mapbox: [language-cpp]#`mapbox::util::variant<T...>`#
+* MPark: [language-cpp]#`mpark::variant<T...>`#
+* Basicpp: [language-cpp]#`variant17::Variant<T...>`#
+* Co-Cpp19: [language-cpp]#`variant19::Variant<T...>`#
+
+[.cue]
+****
+C++17 introduced an STL std::variant.
+EA has an implementation as well.
+Mapbox has created a custom implementation.
+Michael Park investigated various strategies to do visit efficient.
+Basicpp is a custom implementation that mitigates the exception issue.
+Co-Cpp19 again is a new implementation that aims to be fast to compile.
+****
+
+include::030-variant-clang-9.adoc[]
+
+include::030-variant-vs2019.adoc[]
+
+include::031-variant-visit-clang-9.adoc[]
+
+include::031-variant-visit-vs2019.adoc[]
+
+== Summary
+
+[%build]
+* benchmark meta programming
+* compile time is not doomed
+* look for the simplest, sufficient implementation
+
+[.cue]
+****
+Now we have seen a lot of graphs.
+Time for a summary.
+
+We should benchmark our compile times.
+Especially for heavily used constructs.
+
+When we aim to compile faster, we can achieve it!
+
+Before I leave you here, some words about me.
+****
+
+== !
+
+image::andreas.png[role="center", width="400"]
+
+&nbsp;
+
+[%build]
+* Andreas Reischuck
+* @*arBmind*
+
+[.cue]
+****
+Trainings: C++ - Qt - Clean Code
+****
+
+== !
+
+image::hicknhackLogo_new_text.png[role="center", width="400"]
+
+&nbsp;
+
+[.green]_Work_ with us…
+
+[.cue]
+****
+* C++ Qt UIs
+* Dresden
+****
+
+== !
+
+image::cppug.png[role="pull-right", width="550"]
+
+&nbsp;
+
+Give a [.green]*Talk* +
+=> get a *Dresden* tour
+
+[.cue]
+****
+* Video Recording
+* personal city tour
+* I visit your local usergroup
+****
+
+== !
+
+image::rebuild_logo.png[role="pull-left", width="450"]
+
+*Rebuild* language project
+
+[.bigger]
+&nbsp;
+
+[.center]
+[.green]__Collaborate__
+
+[.cue]
+****
+* improved language & tools for everybody
+* Compiler built with C++17
+****
+
+[.subtitle]
+== Compile Benchmark your library!
+
+[language-cpp]#`co_await question_ready()`#
+
+[.cue]
+****
+Thank you for your attention!
+
+Now we are free to discuss any questions.
+****

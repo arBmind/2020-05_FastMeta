@@ -1,0 +1,116 @@
+Faster ►► C++ Meta-Programming
+
+As we embrace meta programming in our application code, its influence on the time to compile becomes very noticable.
+I will show you my compile time benchmark of basic meta programming constructs and templated containers.
+We will discuss the results and some ideas for improvements.
+
+
+With all the modernization of C++ in the last decade, it should be possible to do better meta programming.
+It should be easier to understand, faster to compile and no runtime costs.
+This talk will give you an update on what the current state is are and where we are heading.
+Finally, I will show off some of my own experiences and efforts.
+
+
+CppCon 2019: Jorg Brown “Reducing Template Compilation Overhead, Using C++11, 14, 17, and 20.”
+https://www.youtube.com/watch?v=TyiiNVA1syk
+
+Topics:
+- Motivation
+  • Fast to compile
+  • Fast to run
+  • Fast to understand
+
+- A Survey of Metaprogramming Languages https://dl.acm.org/doi/pdf/10.1145/3354584
+
+- C++ Zero Cost Abstraction
+  • Compile Time vs. runtime (LOOKUP: google talk about unique_ptr)
+
+
+- Tools
+  • -ftime-trace
+  • Godbolt -Xclang -ast-print -fsyntax-only
+
+- CompileBenchmark
+  • Metabench
+  • CppBench
+
+- Compare two types
+  • STL: `std::is_same<A, B>::value`
+
+- Implementation
+  • template<class A, class B> struct is_same : std::false_type {};
+  • template<class A> struct is_same<A, A> : std::true_type {};
+  • template<class A, class B> constexpr auto is_same_v = is_same<A, B>::value;
+
+- Issues? Can we improve?
+
+- CppCon 2019: Jorg Brown “Reducing Template Compilation Overhead, Using C++11, 14, 17, and 20.”
+  https://www.youtube.com/watch?v=TyiiNVA1syk
+
+
+  https://fast.godbolt.org/
+
+- constexpr auto same<A,A> = true
+  => History
+
+
+- code::dive 2017 – Odin Holmes – The fastest template metaprogramming in the West
+  https://www.youtube.com/watch?v=ZpVPexZHYrQ
+
+- C++ Weekly - Ep 189 - C++14's Variable Templates (14. Oct. 2019)
+  https://www.youtube.com/watch?v=2kY-go52rNw
+
+- NDC Techtown - The Hitchhiker's Guide to Faster Builds - Viktor Kirilov (18.09.2019)
+  https://www.youtube.com/watch?v=RTv_-0ITokk
+  https://slides.com/onqtam/faster_builds/embed#/
+
+
+Vector Implementations
+- std::vector
+- etl::vector
+- folly::fbvector
+  https://github.com/facebook/folly/blob/master/folly/FBVector.h
+  - jeMalloc integration, 1.5x growth
+  - custom trivially_relocatable trait
+- 2017 Inishan
+  https://github.com/lnishan/vector
+  - default initialized, x4 growth
+- 2019 SigError
+  https://github.com/SigError/fast-vector
+  - (ptr,size,cap), 2x growth
+  - trivial type optimization
+
+Map Implementations
+- std::map
+- etl::map
+  * struct Data_Node{pair<K,V>} : Node
+  * pool<node>, node* root
+- etl::flat_map
+  * node = pair<K,V>
+  * pool<node>, vector<node*>
+
+Tuple Implementations
+- std::tuple
+  * MSVC2019: recursive inheritance
+- basicpp17/tuple17
+  * constexpr layout for aligned_storage_t
+- eastl::tuple
+  * inheritance leaf<Index, Type>
+  * empty storage optimization
+- Fernando Garcia (https://medium.com/@mortificador/implementing-std-tuple-in-c-17-3cc5c6da7277)
+- tao::tuple (https://github.com/taocpp/tuple)
+- hana::tuple (https://github.com/boostorg/hana)
+  * inheritance ebo<Index, Type>…
+  * empty storage optimization
+
+Variant Implementations
+- STL C++17 std::variant
+- (ETL etl::variant) - limited to up to 8 variants
+- basicpp17/variant17
+- Michael Park mpark::variant (https://github.com/mpark/variant)
+- mapbox::variant (https://github.com/mapbox/variant)
+- eastl::variant
+
+Optional Implementations
+- STL C++17 std::optional
+- ETL etl::optional
