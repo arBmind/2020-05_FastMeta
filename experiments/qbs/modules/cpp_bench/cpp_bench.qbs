@@ -15,6 +15,12 @@ Module {
     Depends { name: "cpp" }
     cpp.cxxLanguageVersion: "c++17"
 
+    property bool debug: false
+    PropertyOptions {
+        name: "debug"
+        description: "store extra debugging details in json_data."
+    }
+
     property varList inputNumber: []
     PropertyOptions {
         name: "inputNumber"
@@ -31,6 +37,12 @@ Module {
     PropertyOptions {
         name: "maxSamplingTime"
         description: "If the total time for compiling samples reached the time limit no more samples are compiled. Default: 2 Minutes"
+    }
+
+    property int maxBaselineSamples: 3
+    PropertyOptions {
+        name: "maxBaselineSamples"
+        description: "How many samples should be taken for the baseline. Less samples may be taken when maxSamplingTime is reached. Default: 3"
     }
 
     property string graphLabel: ""
@@ -167,6 +179,7 @@ Module {
                     var compileProcess = Process();
                     var compilerPath = input.cpp.compilerPath;
                     var includePaths = input.cpp.includePaths;
+                    var debugData = input.cpp_bench.debug;
                     var astPrint = {};
                     if (input.qbs.toolchain.contains('clang')) {
                         var syntaxArgs = [
@@ -190,15 +203,15 @@ Module {
                         ];
                         var compileResult = compileProcess.exec(bashPath, bashArgs, false);
                         var stdOut = compileProcess.readStdOut();
-                        var baselineAstPrint = {
-                            // bashPath: bashPath,
-                            // bashArgs: bashArgs,
-                            // stdOut: stdOut,
-                            // stdErr: compileProcess.readStdErr(),
-                            // compileResult: compileResult,
-                            lineCount: stdOut.match(/lines:\s(\d+)/).map(Number)[1],
-                            instanceCount: stdOut.match(/templates:\s(\d+)/).map(Number)[1],
-                        };
+                        var baselineAstPrint = debugData ? {
+                            bashPath: bashPath,
+                            bashArgs: bashArgs,
+                            stdOut: stdOut,
+                            stdErr: compileProcess.readStdErr(),
+                            compileResult: compileResult,
+                        } : {};
+                        baselineAstPrint.lineCount = stdOut.match(/lines:\s(\d+)/).map(Number)[1];
+                        baselineAstPrint.instanceCount = stdOut.match(/templates:\s(\d+)/).map(Number)[1];
 
                         var bashArgs = [
                             '-c',
@@ -206,16 +219,16 @@ Module {
                         ];
                         var compileResult = compileProcess.exec(bashPath, bashArgs, false);
                         var stdOut = compileProcess.readStdOut();
-                        astPrint = {
-                            baseline: baselineAstPrint,
-                            // bashPath: bashPath,
-                            // bashArgs: bashArgs,
-                            // stdOut: stdOut,
-                            // stdErr: compileProcess.readStdErr(),
-                            // compileResult: compileResult,
-                            lineCount: stdOut.match(/lines:\s(\d+)/).map(Number)[1],
-                            instanceCount: stdOut.match(/templates:\s(\d+)/).map(Number)[1],
-                        };
+                        astPrint = debugData ? {
+                             bashPath: bashPath,
+                             bashArgs: bashArgs,
+                             stdOut: stdOut,
+                             stdErr: compileProcess.readStdErr(),
+                             compileResult: compileResult,
+                        } : {};
+                        astPrint.baseline = baselineAstPrint;
+                        astPrint.lineCount = stdOut.match(/lines:\s(\d+)/).map(Number)[1];
+                        astPrint.instanceCount = stdOut.match(/templates:\s(\d+)/).map(Number)[1];
                     }
 
                     var baselineCompileArgs;
@@ -303,32 +316,40 @@ Module {
                         var compileResult = compileProcess.exec(path, args, true);
                         var stdOut = compileProcess.readStdOut();
                         var stdErr = compileProcess.readStdErr();
-                        return {
-                            args: args,
-                            result: compileResult,
-                            stdOut: stdOut,
-                            stdErr: stdErr,
-                            time: extractCompileTime(stdOut, stdErr),
-                            ram: extractCompileRam(stdOut, stdErr),
-                        };
+                        var data = debugData ? {
+                           args: args,
+                           result: compileResult,
+                           stdOut: stdOut,
+                           stdErr: stdErr,
+                        } : {};
+                        data.time = extractCompileTime(stdOut, stdErr);
+                        data.ram = extractCompileRam(stdOut, stdErr);
+                        return data;
                     }
                     var runPath = timePath || compilerPath;
 
                     var start = Date.now();
+                    var end;
                     // warmup…
                     var warmup = compileRun(compilerPath, []);
 
                     // baseline
-                    var baseline = compileRun(runPath, baselineCompileArgs);
+                    var baselines = []
 
                     // collect samples
                     var samples = [];
-                    for (var i = 0; i < input.cpp_bench.maxSamples; i++) {
+                    var bl = input.cpp_bench.maxBaselineSamples;
+                    var l = Math.max(input.cpp_bench.maxSamples, bl);
+                    for (var i = 0; i < l; i++) {
+                        if (i < bl) baselines.push(compileRun(runPath, baselineCompileArgs));
                         samples.push(compileRun(runPath, []));
 
-                        var end = Date.now();
+                        end = Date.now();
                         if (end - start > input.cpp_bench.maxSamplingTime) break;
                     }
+
+                    baselines.sort(function(a, b) { return b.time - a.time; });
+                    var baseline = baselines[Math.floor(baselines.length / 2)];
 
                     var content = {
                         inputNumber: num,
@@ -338,11 +359,13 @@ Module {
                         args: compileArgs,
                         warmup: warmup,
                         baseline: baseline,
+                        baselines: baselines,
                         samples: samples,
                         astPrint: astPrint,
                         start: start,
                         clock: end-start,
                     };
+
                     compileProcess.close(); // done
                     var jsonFile = new TextFile(outputFilePath, TextFile.WriteOnly);
                     jsonFile.write(JSON.stringify(content, null, '  '));
