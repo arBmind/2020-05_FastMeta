@@ -1,15 +1,19 @@
 #pragma once
 #include <cstddef> // size_t
-#include <utility>
 
 namespace array19 {
 
+/// View on a slice of consequtive memory
+/// Usage:
+///     SliceOf<int> // allow modification of values
+///     SliceOf<const int> // values are treated const
+///
+/// Note: Slice itself is an unmodifiable value object
 template<class T> //
 struct SliceOf {
     using Element = T;
     using Count = size_t;
     using Index = size_t;
-    using Slice = SliceOf;
 
     constexpr SliceOf() = default;
     constexpr SliceOf(const SliceOf&) = default;
@@ -17,35 +21,25 @@ struct SliceOf {
     constexpr SliceOf(SliceOf&&) = default;
     constexpr SliceOf& operator=(SliceOf&&) = default;
 
-    constexpr explicit //
-        SliceOf(Element* data, Element* end) noexcept
-        : _data(data)
-        , _count(end - data) {}
+    constexpr explicit SliceOf(Element* data, Element* end) noexcept : m_data(data), m_count(end - data) {}
+    constexpr explicit SliceOf(Element* data, Count count) noexcept : m_data(data), m_count(count) {}
 
-    constexpr explicit //
-        SliceOf(Element* data, Count count) noexcept
-        : _data(data)
-        , _count(count) {}
-
-    template<size_t N> constexpr explicit //
-        SliceOf(T (&array)[N]) noexcept
-        : _data(N > 0 ? array : nullptr)
-        , _count(N) {}
-
-    [[nodiscard]] constexpr auto count() const -> Count { return _count; }
-    [[nodiscard]] constexpr auto slice(Index offset, Count count) const -> Slice {
-        return Slice{_data + offset, count};
+    [[nodiscard]] constexpr auto count() const -> Count { return m_count; }
+    [[nodiscard]] constexpr auto slice(Index offset, Count count) const -> SliceOf {
+        return SliceOf{m_data + offset, count};
     }
 
-    [[nodiscard]] constexpr auto begin() const & noexcept -> Element* { return _data; }
-    [[nodiscard]] constexpr auto end() const& -> Element* { return _data + _count; }
-    [[nodiscard]] constexpr auto at(Index index) const & noexcept -> Element& { return *(_data + index); }
+    [[nodiscard]] constexpr auto begin() const & noexcept -> Element* { return m_data; }
+    [[nodiscard]] constexpr auto end() const& -> Element* { return m_data + m_count; }
+    [[nodiscard]] constexpr auto at(Index index) const & noexcept -> Element& { return *(m_data + index); }
+
+    [[nodiscard]] constexpr auto asConst() const noexcept -> SliceOf<const T> {
+        return SliceOf<const T>{m_data, m_count};
+    }
 
 private:
-    Element* _data{};
-    Count _count{};
+    Element* m_data{};
+    Count m_count{};
 };
-
-template<class T, size_t N> SliceOf(T (&)[N])->SliceOf<T>;
 
 } // namespace array19

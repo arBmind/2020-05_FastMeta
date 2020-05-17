@@ -25,7 +25,3 @@ void mutable_Array_test() {
 
     static_assert(ca.at(1) == 5);
 }
-
-int main() {
-    // no runtime tests!
-}
