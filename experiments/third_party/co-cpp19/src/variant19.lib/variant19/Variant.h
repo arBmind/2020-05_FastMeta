@@ -5,6 +5,7 @@
 #include "meta19/Unreachable.h"
 #include "meta19/index_pack.h"
 #include "meta19/type_pack_front_type.h"
+
 #include <memory>
 #include <new>
 #include <utility>
@@ -13,24 +14,22 @@ namespace variant19 {
 
 using meta19::FrontType;
 using meta19::Index;
+using meta19::index_of_map;
 using meta19::index_pack;
 using meta19::IndexPack;
 using meta19::IndexTypeMap;
-using meta19::map_index_of;
-using meta19::MapTypeAt;
 using meta19::Type;
+using meta19::TypeAtMap;
 
 namespace details {
 
-template<size_t I, size_t... Is> //
-constexpr auto constexprMaxOf() {
+template<size_t I, size_t... Is> constexpr auto constexprMaxOf() {
     auto r = I;
     (void)(((Is > r ? r = Is : 0), ...));
     return r;
 }
 
-template<size_t N> //
-constexpr auto selectVariantWhichValue() {
+template<size_t N> constexpr auto selectVariantWhichValue() {
     if constexpr (N <= std::numeric_limits<uint8_t>::max()) {
         return uint8_t{};
     }
@@ -80,8 +79,7 @@ struct VariantWhich {
     using Map = IndexTypeMap<Ts...>;
 
     constexpr VariantWhich() = default;
-    explicit constexpr VariantWhich(Value v)
-        : m(v) {}
+    explicit constexpr VariantWhich(Value v) : m(v) {}
 
     constexpr operator Value() const { return m; }
 
@@ -90,11 +88,11 @@ struct VariantWhich {
 
     template<class T> //
     static constexpr auto of(Type<T>* = {}) -> VariantWhich {
-        return VariantWhich{static_cast<Value>(map_index_of<T, Map>)};
+        return VariantWhich{static_cast<Value>(index_of_map<T, Map>)};
     }
 
-    template<class T> constexpr bool operator==(Type<T>*) const { return map_index_of<T, Map> == m; }
-    template<class T> constexpr bool operator!=(Type<T>*) const { return map_index_of<T, Map> != m; }
+    template<class T> constexpr bool operator==(Type<T>*) const { return index_of_map<T, Map> == m; }
+    template<class T> constexpr bool operator!=(Type<T>*) const { return index_of_map<T, Map> != m; }
 
 private:
     Value m{sizeof...(Ts)};
@@ -169,12 +167,10 @@ private:
             return std::launder(reinterpret_cast<T*>(&storage)); //
         }
 
-        template<class T, class... Args> //
-        constexpr auto constructAs(Args&&... args) {
+        template<class T, class... Args> constexpr auto constructAs(Args&&... args) {
             new (&storage) T(std::forward<Args>(args)...);
         }
-        template<class... Args> //
-        constexpr auto constructWhich(WhichValue w, Args&&... args) {
+        template<class... Args> constexpr auto constructWhich(WhichValue w, Args&&... args) {
             (((Is == w ? (constructAs<Ts>(std::forward<Args>(args)...), 0) : 0), ...));
         }
 
@@ -182,8 +178,7 @@ private:
             (void)((Is == which ? (std::destroy_at(amendAsPtr<Ts>()), true) : false) || ...); //
         }
 
-        template<class F> //
-        constexpr auto visitImpl(F&& f) const -> decltype(auto) {
+        template<class F> constexpr auto visitImpl(F&& f) const -> decltype(auto) {
             if constexpr (std::is_same_v<void, decltype(f(first()))>) {
                 (void)(((Is == which ? (f(*asPtr<Ts>()), true) : false) || ...));
             }
@@ -192,8 +187,7 @@ private:
             }
         }
 
-        template<class F> //
-        constexpr auto amendVisitImpl(F&& f) -> decltype(auto) {
+        template<class F> constexpr auto amendVisitImpl(F&& f) -> decltype(auto) {
             if constexpr (std::is_same_v<void, decltype(f(first()))>) {
                 (void)(((Is == which ? (f(*amendAsPtr<Ts>()), true) : false) || ...));
             }
@@ -213,7 +207,9 @@ private:
 public:
     constexpr Variant() = default;
 
-    /// construct from move/copy
+    /// construct
+    /// from
+    /// move/copy
     template<
         class T,
         class BT = std::remove_cv_t<std::remove_reference_t<T>>,
@@ -221,35 +217,36 @@ public:
     Variant(T&& t) {
         static_assert((std::is_same_v<BT, Ts> || ...), "type not part of variant");
         indexed.template constructAs<BT>(std::forward<T>(t));
-        indexed.which = map_index_of<BT, Map>;
+        indexed.which = index_of_map<BT, Map>;
     }
 
-    /// construct of type inside variant
-    template<class T, class... Args> //
-    Variant(Type<T>, Args&&... args) {
+    /// construct of
+    /// type inside
+    /// variant
+    template<class T, class... Args> Variant(Type<T>, Args&&... args) {
         static_assert((std::is_same_v<T, Ts> || ...), "type not part of variant");
         indexed.template constructAs<T>(std::forward<Args>(args)...);
-        indexed.which = map_index_of<T, Map>;
+        indexed.which = index_of_map<T, Map>;
     }
 
-    /// construct indexed type inside variant
-    template<size_t I, class... Args> //
-    Variant(Index<I>, Args&&... args) {
+    /// construct
+    /// indexed type
+    /// inside
+    /// variant
+    template<size_t I, class... Args> Variant(Index<I>, Args&&... args) {
         static_assert(I < npos, "index not part of variant");
-        using T = MapTypeAt<I, Map>;
+        using T = TypeAtMap<I, Map>;
         indexed.template constructAs<T>(std::forward<Args>(args)...);
         indexed.which = I;
     }
 
     constexpr auto which() const -> Which { return Which{indexed.which}; }
 
-    template<class T> //
-    constexpr auto as(Type<T>* = {}) const -> const T& {
+    template<class T> constexpr auto as(Type<T>* = {}) const -> const T& {
         static_assert((std::is_same_v<T, Ts> || ...), "type not part of variant");
         return *indexed.template asPtr<std::remove_reference_t<T>>();
     }
-    template<class T> //
-    constexpr auto amendAs(Type<T>* = {}) -> T& {
+    template<class T> constexpr auto amendAs(Type<T>* = {}) -> T& {
         static_assert((std::is_same_v<T, Ts> || ...), "type not part of variant");
         return *indexed.template amendAsPtr<T>();
     }
