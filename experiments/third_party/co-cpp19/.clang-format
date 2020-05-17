@@ -3,6 +3,7 @@ BasedOnStyle: LLVM
 ColumnLimit: 120
 IndentWidth: 4
 AccessModifierOffset: -4
+ConstructorInitializerIndentWidth: 8
 
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: true
@@ -10,20 +11,28 @@ AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 
+AllowAllArgumentsOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+
 AlignAfterOpenBracket: AlwaysBreak
 AlignTrailingComments: false
 AlignOperands: false
 
-AlwaysBreakTemplateDeclarations: No
+AlwaysBreakTemplateDeclarations: MultiLine
+AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
 
 BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: true
 BraceWrapping:
     AfterNamespace: false
     AfterExternBlock: false
+    AfterCaseLabel: false
     AfterClass: false
     AfterStruct: false
     AfterUnion: false
@@ -43,10 +52,15 @@ BinPackParameters: false
 SpaceAfterTemplateKeyword: false
 SpaceBeforeParens: ControlStatements
 IndentPPDirectives: AfterHash
+IndentWrappedFunctionNames: true
 
 SortIncludes: true
 SortUsingDeclarations: true
+IncludeBlocks: Regroup
+# InsertTrailingCommas: Wrapped
 
 PointerAlignment: Left
 
-PenaltyReturnTypeOnItsOwnLine: 1000
+PenaltyReturnTypeOnItsOwnLine: 2000
+PenaltyBreakBeforeFirstCallParameter: 100
+PenaltyBreakTemplateDeclaration: 10
