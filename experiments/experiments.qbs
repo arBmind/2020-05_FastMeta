@@ -49,10 +49,10 @@ Project {
     }
 
     Product {
+        name: "[extra files]"
         files: [
             ".clang-format",
         ]
-        name: "[extra files]"
         Group {
             name: "qbs"
             files: ["**/*.*"]
