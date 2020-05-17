@@ -19,13 +19,13 @@ Project {
 
         Export {
             Depends { name: "cpp" }
-            cpp.cxxLanguageVersion: "c++17"
+            cpp.cxxLanguageVersion: "c++2a"
             // cpp.treatWarningsAsErrors: true
 
             Properties {
                 condition: qbs.toolchain.contains('msvc')
                 cpp.cxxFlags: base.concat(
-                    "/std:c++latest", "/permissive-", "/Zc:__cplusplus", // best C++ compatibility
+                    "/permissive-", "/Zc:__cplusplus", // best C++ compatibility
                     "/diagnostics:caret", // better errors
                     "/wd4068", // ignore unknown pragmas
                     "/D_ENABLE_EXTENDED_ALIGNED_STORAGE" // use real alignments
