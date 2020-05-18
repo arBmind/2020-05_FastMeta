@@ -4,7 +4,6 @@
 
 namespace meta19 {
 
-template<class IP> //
-using IndexPackFront = RemoveReference<decltype(*index_pack_front<IP>)>;
+template<class IP> using IndexPackFront = PointeeOf<decltype(index_pack_front<IP>)>;
 
 } // namespace meta19

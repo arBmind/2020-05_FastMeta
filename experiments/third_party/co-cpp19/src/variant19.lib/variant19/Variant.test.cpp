@@ -1,6 +1,5 @@
+#include "Variant.equals.h"
 #include "Variant.h"
-#include "Variant.ops.h"
-
 #include "meta19/Index.h"
 #include "meta19/Type.h"
 

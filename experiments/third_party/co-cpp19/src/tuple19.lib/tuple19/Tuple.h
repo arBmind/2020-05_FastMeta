@@ -1,6 +1,7 @@
 #pragma once
 #include "meta19/Index.h"
 #include "meta19/Type.h"
+
 #include <utility>
 
 namespace tuple19 {
@@ -35,11 +36,9 @@ private:
 
         constexpr IndexedTuple() = default;
 
-        constexpr IndexedTuple(const Ts&... ts)
-            : details::TupleEntry<Is, Ts>({ts})... {}
+        constexpr IndexedTuple(const Ts&... ts) : details::TupleEntry<Is, Ts>({ts})... {}
 
-        constexpr IndexedTuple(Ts&&... ts)
-            : details::TupleEntry<Is, Ts>({std::move(ts)})... {}
+        constexpr IndexedTuple(Ts&&... ts) : details::TupleEntry<Is, Ts>({std::move(ts)})... {}
 
         template<class F> void visitAll(F&& f) const& {
             (void)((f(*static_cast<const details::TupleEntry<Is, Ts>*>(this)), ...));
@@ -50,19 +49,15 @@ private:
     };
 
     using Indexed = IndexedTuple<std::make_index_sequence<sizeof...(Ts)>>;
-    enum : size_t {
-        npos = sizeof...(Ts),
-    };
+    enum : size_t { npos = sizeof...(Ts) };
 
 private:
     Indexed indexed;
 
 public:
     constexpr Tuple() = default;
-    constexpr Tuple(const Ts&... ts)
-        : indexed(ts...) {}
-    constexpr Tuple(Ts&&... ts)
-        : indexed(std::move(ts)...) {}
+    constexpr Tuple(const Ts&... ts) : indexed(ts...) {}
+    constexpr Tuple(Ts&&... ts) : indexed(std::move(ts)...) {}
 
     template<class... Os> static constexpr auto fromArgs(Os&&... os) -> Tuple {
         auto res = Tuple{};

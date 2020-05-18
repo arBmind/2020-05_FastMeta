@@ -47,6 +47,12 @@ Project {
             }
         }
     }
+    Product {
+        name: "cpp19"
+        Export {
+            Depends { name: "cpp17" }
+        }
+    }
 
     Product {
         name: "[extra files]"

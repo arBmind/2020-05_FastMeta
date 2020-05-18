@@ -4,8 +4,8 @@ Product {
     Depends { name: "meta19" }
 
     files: [
+        "Variant.equals.h",
         "Variant.h",
-        "Variant.ops.h",
     ]
 
     Export {

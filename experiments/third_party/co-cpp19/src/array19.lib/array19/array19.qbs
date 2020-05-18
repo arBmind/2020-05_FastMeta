@@ -1,6 +1,6 @@
 
 Product {
-    Depends { name: "cpp17" }
+    Depends { name: "cpp19" }
 
     files: [
         "*.h",
@@ -9,6 +9,6 @@ Product {
     Export {
         Depends { name: "cpp" }
         cpp.includePaths: [".."]
-        Depends { name: "cpp17" }
+        Depends { name: "cpp19" }
     }
 }

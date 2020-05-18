@@ -1,6 +1,5 @@
 
 Product {
-    Depends { name: "cpp17" }
     Depends { name: "array19" }
 
     Group {
@@ -14,13 +13,10 @@ Product {
         name: "IndexPack"
         files: [
             "IndexPack.h",
-            "IndexPackFor.h",
             "IndexPackFront.h",
             "IndexPackJoin.h",
             "IndexPackTail.h",
             "IndexPackTemplate.h",
-            "IndexSequencePack.h",
-            "IndexSequencePackFor.h",
             "ChangeIndexPackTemplate.h",
             "index_pack.h",
             "index_pack_back_value.h",
@@ -42,8 +38,9 @@ Product {
     Group {
         name: "TypePack"
         files: [
+            "ChangeTypePackTemplate.h",
             "TypePack.h",
-            "TypeValuePackTemplate.h",
+            "TypePackTemplate.h",
             "type_pack.h",
             "type_pack_front_type.h",
         ]
@@ -51,7 +48,6 @@ Product {
 
     files: [
         "Unreachable.h",
-        "false_for.h",
         "isSame.h",
         "nulltpr_to.h",
     ]
@@ -59,7 +55,6 @@ Product {
     Export {
         Depends { name: "cpp" }
         cpp.includePaths: [".."]
-        Depends { name: "cpp17" }
         Depends { name: "array19" }
     }
 }

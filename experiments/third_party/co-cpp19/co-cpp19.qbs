@@ -15,7 +15,7 @@ Project {
 
     // note: if do not use this .qbs project you need a similar setup
     Product {
-        name: "cpp17"
+        name: "cpp19"
 
         Export {
             Depends { name: "cpp" }
@@ -49,6 +49,7 @@ Project {
         name: "[Extra Files]"
         files: [
             ".clang-format",
+            "Readme.md",
         ]
     }
 }

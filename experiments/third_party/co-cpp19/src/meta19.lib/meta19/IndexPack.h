@@ -1,9 +1,8 @@
 #pragma once
-#include <stddef.h>
+#include <stddef.h> // size_t
 
 namespace meta19 {
 
-template<size_t...> //
-struct IndexPack;
+template<size_t...> struct IndexPack;
 
 } // namespace meta19
