@@ -183,7 +183,7 @@ Module {
                     var astPrint = {};
                     if (input.qbs.toolchain.contains('clang')) {
                         var syntaxArgs = [
-                            "-std=c++17", "-pedantic", // best C++17 mode
+                            "-std=c++2a", "-pedantic", // best C++17 mode
                             "-Xclang", "-ast-print", // print expanded sourcecode
                             "-fsyntax-only", // checks syntax only
                             "-DCPPBENCH_N="+num,
@@ -248,7 +248,7 @@ Module {
                         // compilerPath = compilerPath.replace("cl.exe", "c1xx.dll");
                         compileArgs = [
                             "/nologo",
-                            "/std:c++17", "/permissive-", "/Za", // best C++17 mode
+                            "/std:c++latest", "/permissive-", "/Za", // best C++17 mode
                             "/Bt", // Generate Time Report
                             "/Zs", // Checks syntax only
                             "/DCPPBENCH_N="+num,
@@ -274,7 +274,7 @@ Module {
                         }
 
                         compileArgs = [
-                            "-std=c++17", "-pedantic", // best C++17 mode
+                            "-std=c++2a", "-pedantic", // best C++17 mode
                             "-ftime-report", // Generate Time Report
                             "-fsyntax-only", // Checks syntax only
                             "-DCPPBENCH_N="+num,
