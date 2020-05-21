@@ -13,6 +13,8 @@ Project {
         "021_tuple_visit",
         "030_variant",
         "031_variant_visit",
+        "040_partial",
+        "041_partial_visit",
         "third_party/third_party.qbs",
     ]
 

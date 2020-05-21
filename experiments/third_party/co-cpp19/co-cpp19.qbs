@@ -7,6 +7,7 @@ Project {
         "third_party/third_party.qbs",
         "src/array19.lib",
         "src/meta19.lib",
+        "src/partial19.lib",
         "src/tuple19.lib",
         "src/variant19.lib",
     ]
@@ -46,7 +47,7 @@ Project {
     }
 
     Product {
-        name: "[Extra Files]"
+        name: "_Extra Files_"
         files: [
             ".clang-format",
             "Readme.md",
