@@ -73,8 +73,7 @@ constexpr auto amendVisitRecursive(V&& v, F&& f, IndexPack<I, Is...>*) -> declty
 
 } // namespace details
 
-template<class... Ts> //
-struct VariantWhich {
+template<class... Ts> struct VariantWhich {
     using Value = decltype(details::selectVariantWhichValue<sizeof...(Ts)>());
     using Map = IndexTypeMap<Ts...>;
 
@@ -86,8 +85,7 @@ struct VariantWhich {
     constexpr bool operator==(VariantWhich o) const { return o.m == m; }
     constexpr bool operator!=(VariantWhich o) const { return o.m != m; }
 
-    template<class T> //
-    static constexpr auto of(Type<T>* = {}) -> VariantWhich {
+    template<class T> static constexpr auto of(Type<T>* = {}) -> VariantWhich {
         return VariantWhich{static_cast<Value>(index_of_map<T, Map>)};
     }
 
@@ -98,8 +96,7 @@ private:
     Value m{sizeof...(Ts)};
 };
 
-template<class... Ts> //
-struct Variant {
+template<class... Ts> struct Variant {
     using Which = VariantWhich<Ts...>;
     using Map = typename Which::Map;
     enum { npos = sizeof...(Ts) }; // invalid state after exception - only destruction checks!
@@ -207,9 +204,7 @@ private:
 public:
     constexpr Variant() = default;
 
-    /// construct
-    /// from
-    /// move/copy
+    /// construct from move/copy
     template<
         class T,
         class BT = std::remove_cv_t<std::remove_reference_t<T>>,
@@ -220,20 +215,15 @@ public:
         indexed.which = index_of_map<BT, Map>;
     }
 
-    /// construct of
-    /// type inside
-    /// variant
-    template<class T, class... Args> Variant(Type<T>, Args&&... args) {
+    /// construct of type inside variant
+    template<class T, class... Args> Variant(Type<T>*, Args&&... args) {
         static_assert((std::is_same_v<T, Ts> || ...), "type not part of variant");
         indexed.template constructAs<T>(std::forward<Args>(args)...);
         indexed.which = index_of_map<T, Map>;
     }
 
-    /// construct
-    /// indexed type
-    /// inside
-    /// variant
-    template<size_t I, class... Args> Variant(Index<I>, Args&&... args) {
+    /// construct indexed type inside variant
+    template<size_t I, class... Args> Variant(Index<I>*, Args&&... args) {
         static_assert(I < npos, "index not part of variant");
         using T = TypeAtMap<I, Map>;
         indexed.template constructAs<T>(std::forward<Args>(args)...);
