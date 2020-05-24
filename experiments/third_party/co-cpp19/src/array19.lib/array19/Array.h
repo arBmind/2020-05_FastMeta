@@ -7,8 +7,7 @@ namespace array19 {
 /// * no member types
 /// * no `operator[]` - use `at` and `amendAt`
 /// * no exceptions
-template<class T, size_t C> //
-struct Array {
+template<class T, size_t C> struct Array {
     using Element = T;
     static constexpr auto count = C;
     using Size = decltype(C);
@@ -29,6 +28,6 @@ struct Array {
 /// deduction guide without checking all types are the same
 /// usage:
 ///     Array{1, 2, 3};
-template<class T, class... Ts> Array(T, Ts...)->Array<T, 1 + sizeof...(Ts)>;
+template<class T, class... Ts> Array(T, Ts...) -> Array<T, 1 + sizeof...(Ts)>;
 
 } // namespace array19

@@ -10,8 +10,7 @@ template<class T> bool operator==(const DynamicArrayOf<T>& a, const DynamicArray
     return true;
 }
 
-template<class T> //
-constexpr bool operator!=(const DynamicArrayOf<T>& a, const DynamicArrayOf<T>& b) {
+template<class T> constexpr bool operator!=(const DynamicArrayOf<T>& a, const DynamicArrayOf<T>& b) {
     return !(a == b);
 }
 

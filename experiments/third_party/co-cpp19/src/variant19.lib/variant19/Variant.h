@@ -160,9 +160,7 @@ private:
         template<class T> constexpr auto asPtr() const -> const T* {
             return std::launder(reinterpret_cast<const T*>(&storage));
         }
-        template<class T> constexpr auto amendAsPtr() -> T* {
-            return std::launder(reinterpret_cast<T*>(&storage)); //
-        }
+        template<class T> constexpr auto amendAsPtr() -> T* { return std::launder(reinterpret_cast<T*>(&storage)); }
 
         template<class T, class... Args> constexpr auto constructAs(Args&&... args) {
             new (&storage) T(std::forward<Args>(args)...);
@@ -171,9 +169,7 @@ private:
             (((Is == w ? (constructAs<Ts>(std::forward<Args>(args)...), 0) : 0), ...));
         }
 
-        constexpr void destruct() {
-            (void)((Is == which ? (std::destroy_at(amendAsPtr<Ts>()), true) : false) || ...); //
-        }
+        constexpr void destruct() { (void)((Is == which ? (std::destroy_at(amendAsPtr<Ts>()), true) : false) || ...); }
 
         template<class F> constexpr auto visitImpl(F&& f) const -> decltype(auto) {
             if constexpr (std::is_same_v<void, decltype(f(first()))>) {

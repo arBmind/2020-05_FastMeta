@@ -1,12 +1,10 @@
 #pragma once
-#include "meta19/Type.h"
-
 #include "Variant.h"
+#include "meta19/Type.h"
 
 namespace variant19 {
 
-template<class... Ts> //
-constexpr bool operator==(const Variant<Ts...>& a, const Variant<Ts...>& b) {
+template<class... Ts> constexpr bool operator==(const Variant<Ts...>& a, const Variant<Ts...>& b) {
     using meta19::type;
     if (a.which() != b.which()) return false;
 
@@ -16,9 +14,6 @@ constexpr bool operator==(const Variant<Ts...>& a, const Variant<Ts...>& b) {
     });
 }
 
-template<class... Ts> //
-constexpr bool operator!=(const Variant<Ts...>& a, const Variant<Ts...>& b) {
-    return !(a == b);
-}
+template<class... Ts> constexpr bool operator!=(const Variant<Ts...>& a, const Variant<Ts...>& b) { return !(a == b); }
 
 } // namespace variant19

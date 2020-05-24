@@ -9,8 +9,7 @@ namespace array19 {
 ///     SliceOf<const int> // values are treated const
 ///
 /// Note: Slice itself is an unmodifiable value object
-template<class T> //
-struct SliceOf {
+template<class T> struct SliceOf {
     using Element = T;
     using Count = size_t;
     using Index = size_t;
@@ -29,9 +28,9 @@ struct SliceOf {
         return SliceOf{m_data + offset, count};
     }
 
-    [[nodiscard]] constexpr auto begin() const & noexcept -> Element* { return m_data; }
+    [[nodiscard]] constexpr auto begin() const& noexcept -> Element* { return m_data; }
     [[nodiscard]] constexpr auto end() const& -> Element* { return m_data + m_count; }
-    [[nodiscard]] constexpr auto at(Index index) const & noexcept -> Element& { return *(m_data + index); }
+    [[nodiscard]] constexpr auto at(Index index) const& noexcept -> Element& { return *(m_data + index); }
 
     [[nodiscard]] constexpr auto asConst() const noexcept -> SliceOf<const T> {
         return SliceOf<const T>{m_data, m_count};

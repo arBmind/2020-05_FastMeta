@@ -7,8 +7,7 @@ namespace array19 {
 ///
 /// usage:
 ///   for (auto [valueA, valueB] : Zip{a, b});
-template<class A, class B> //
-struct Zip {
+template<class A, class B> struct Zip {
     using AIt = decltype(adlBegin(*static_cast<A*>(nullptr)));
     using BIt = decltype(adlBegin(*static_cast<B*>(nullptr)));
     using ARes = decltype(**static_cast<AIt*>(nullptr));
@@ -46,6 +45,6 @@ private:
     B* b{};
 };
 
-template<class A, class B> Zip(A&, B&)->Zip<A, B>;
+template<class A, class B> Zip(A&, B&) -> Zip<A, B>;
 
 } // namespace array19

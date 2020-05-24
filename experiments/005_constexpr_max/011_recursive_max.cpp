@@ -13,16 +13,15 @@ template<size_t _First, size_t _Second, size_t... _Rest> struct Maximum<_First, 
 };
 
 #ifndef CPPBENCH_N
-constexpr std::size_t CPPBENCH_N = 10;
+constexpr size_t CPPBENCH_N = 10;
 #endif
 
 constexpr auto n_pack = std::make_index_sequence<CPPBENCH_N>();
 
 template<class T, T V> struct StrongConst { T v = V; };
 
-template<std::size_t... Is> //
-auto bench_tuple(std::index_sequence<Is...>) {
-    ((void)sizeof(StrongConst<std::size_t, Is>), ...);
+template<size_t... Is> auto bench_tuple(std::index_sequence<Is...>) {
+    ((void)sizeof(StrongConst<size_t, Is>), ...);
 #ifdef BASELINE
 #else
     (void)Maximum<(10 + Is)...>::value;
@@ -39,6 +38,4 @@ auto bench_tuple(std::index_sequence<Is...>) {
     return 0;
 }
 
-int main() {
-    return bench_tuple(n_pack); //
-}
+int main() { return bench_tuple(n_pack); }

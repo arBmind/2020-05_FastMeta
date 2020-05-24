@@ -23,15 +23,14 @@ constexpr auto maxOf(Slice<const size_t> s) {
 }
 
 #ifndef CPPBENCH_N
-constexpr std::size_t CPPBENCH_N = 10;
+constexpr size_t CPPBENCH_N = 10;
 #endif
 
 constexpr auto n_pack = std::make_index_sequence<CPPBENCH_N>();
 
 template<class T, T V> struct StrongConst { T v = V; };
 
-template<std::size_t... Is> //
-auto bench_tuple(std::index_sequence<Is...>) {
+template<size_t... Is> auto bench_tuple(std::index_sequence<Is...>) {
 #ifdef BASELINE
 #else
     constexpr size_t a1[] = {(10 + Is)...};
@@ -69,6 +68,4 @@ auto bench_tuple(std::index_sequence<Is...>) {
     return 0;
 }
 
-int main() {
-    return bench_tuple(n_pack); //
-}
+int main() { return bench_tuple(n_pack); }

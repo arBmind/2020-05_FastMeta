@@ -33,8 +33,7 @@ template<class... Ts> struct Tuple {
 private:
     template<class Is> struct IndexedTuple;
 
-    template<size_t... Is> //
-    struct IndexedTuple<std::index_sequence<Is...>> : details::TupleEntry<Is, Ts>... {
+    template<size_t... Is> struct IndexedTuple<std::index_sequence<Is...>> : details::TupleEntry<Is, Ts>... {
 
         constexpr IndexedTuple() = default;
 
@@ -46,7 +45,7 @@ private:
             (void)((f(*static_cast<const details::TupleEntry<Is, Ts>*>(this)), ...));
         }
         template<class F> constexpr void amendAll(F&& f) & {
-            (void)((f(*static_cast<details::TupleEntry<Is, Ts>*>(this)), ...)); //
+            (void)((f(*static_cast<details::TupleEntry<Is, Ts>*>(this)), ...));
         }
     };
 
@@ -111,6 +110,6 @@ template<> struct Tuple<> {
     template<class F> void amendAll(F&&) & {}
 };
 
-template<class... Ts> Tuple(Ts...)->Tuple<Ts...>;
+template<class... Ts> Tuple(Ts...) -> Tuple<Ts...>;
 
 } // namespace tuple19

@@ -8,8 +8,7 @@ namespace array19 {
 
 namespace details {
 
-template<class ElemStorage> //
-struct DynamicStorage final {
+template<class ElemStorage> struct DynamicStorage final {
     using ElementStorage = ElemStorage;
     using Capacity = size_t;
     using Index = size_t;
@@ -38,8 +37,7 @@ struct DynamicStorage final {
 
 } // namespace details
 
-template<class T> //
-struct DynamicArrayOf final {
+template<class T> struct DynamicArrayOf final {
     using Element = T;
     using Size = size_t;
     using Index = size_t;
@@ -89,28 +87,26 @@ struct DynamicArrayOf final {
     [[nodiscard]] auto totalCapacity() const -> Size { return m_storage.capacity; }
     [[nodiscard]] auto unusedCapacity() const -> Size { return m_storage.capacity - m_count; }
 
-    [[nodiscard]] auto begin() const & noexcept -> ConstIterator {
+    [[nodiscard]] auto begin() const& noexcept -> ConstIterator {
         return std::launder(reinterpret_cast<const T*>(m_storage.pointer));
     }
     // NOTE: end() is not laundered!
-    [[nodiscard]] auto end() const & noexcept -> ConstIterator {
+    [[nodiscard]] auto end() const& noexcept -> ConstIterator {
         return reinterpret_cast<const T*>(m_storage.pointer + m_count);
     }
 
-    [[nodiscard]] auto at(Index index) const & noexcept -> ConstReference {
+    [[nodiscard]] auto at(Index index) const& noexcept -> ConstReference {
         return *std::launder(reinterpret_cast<const T*>(m_storage.pointer + index));
     }
-    [[nodiscard]] auto front() const & noexcept -> ConstReference { return at(0); }
-    [[nodiscard]] auto back() const & noexcept -> ConstReference { return at(m_count - 1); }
+    [[nodiscard]] auto front() const& noexcept -> ConstReference { return at(0); }
+    [[nodiscard]] auto back() const& noexcept -> ConstReference { return at(m_count - 1); }
     [[nodiscard]] auto slice() const -> ConstSlice { return ConstSlice{begin(), end()}; }
 
     [[nodiscard]] auto amendBegin() & noexcept -> Iterator {
         return std::launder(reinterpret_cast<T*>(m_storage.pointer));
     }
     // NOTE: end() is not laundered!
-    [[nodiscard]] auto amendEnd() & noexcept -> Iterator {
-        return amendBegin() + m_count; //
-    }
+    [[nodiscard]] auto amendEnd() & noexcept -> Iterator { return amendBegin() + m_count; }
 
     [[nodiscard]] auto amendAt(Index index) & noexcept -> Reference {
         return *std::launder(reinterpret_cast<T*>(m_storage.pointer + index));

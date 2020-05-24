@@ -8,23 +8,20 @@
 #include <utility>
 
 using meta19::Index;
+using meta19::index_of_map;
 using meta19::IndexType;
 using meta19::IndexTypeMap;
-using meta19::map_index_of;
-using meta19::MapTypeAt;
 using meta19::type;
 using meta19::Type;
+using meta19::TypeAtMap;
 
 namespace details {
 
 using array19::Array;
 
-constexpr auto alignOffset(size_t align, size_t offset) -> size_t {
-    return ((offset + align - 1) / align) * align; //
-}
+constexpr auto alignOffset(size_t align, size_t offset) -> size_t { return ((offset + align - 1) / align) * align; }
 
-template<class... Ts> //
-constexpr auto tupleLayout() -> Array<size_t, 1 + sizeof...(Ts)> {
+template<class... Ts> constexpr auto tupleLayout() -> Array<size_t, 1 + sizeof...(Ts)> {
 
     auto r = Array<size_t, 1 + sizeof...(Ts)>{};
     constexpr auto sizes = Array{sizeof(Ts)...};
@@ -46,8 +43,7 @@ template<class... Ts> struct Tuple {
 private:
     template<class Is> struct IndexedTuple;
 
-    template<size_t... Is> //
-    struct IndexedTuple<std::index_sequence<Is...>> {
+    template<size_t... Is> struct IndexedTuple<std::index_sequence<Is...>> {
         struct Map : IndexType<Is, Ts>... {};
         static constexpr auto offset_array = details::tupleLayout<Ts...>();
         enum : size_t {
@@ -57,8 +53,8 @@ private:
 
         alignas(Ts...) std::byte storage[storage_size];
 
-        template<size_t I> using At = MapTypeAt<I, Map>;
-        template<class T> static constexpr auto index_of = map_index_of<T, Map>;
+        template<size_t I> using At = TypeAtMap<I, Map>;
+        template<class T> static constexpr auto index_of = index_of_map<T, Map>;
 
         template<size_t I> constexpr auto rawPtrAt() -> void* { return storage + offset_array.at(I); }
         template<size_t I> constexpr auto rawPtrAt() const -> const void* { return storage + offset_array.at(I); }
@@ -145,26 +141,23 @@ public:
     template<class F> void amendAll(F&& f) & { (void)((f(*indexed.template ptrOf<Ts>()), ...)); }
 };
 
-template<class... Ts> Tuple(Ts...) -> Tuple<Ts...>;
+template<class... Ts> Tuple(Ts...)->Tuple<Ts...>;
 
 #ifndef CPPBENCH_N
-constexpr std::size_t CPPBENCH_N = 10;
+constexpr size_t CPPBENCH_N = 10;
 #endif
 
 constexpr auto n_pack = std::make_index_sequence<CPPBENCH_N>();
 
 template<class T, T V> struct StrongConst { T v = V; };
 
-template<std::size_t... Is> //
-auto bench_tuple(std::index_sequence<Is...>) {
-    ((void)StrongConst<std::size_t, Is>{}, ...);
+template<size_t... Is> auto bench_tuple(std::index_sequence<Is...>) {
+    ((void)StrongConst<size_t, Is>{}, ...);
 #ifdef BASELINE
 #else
-    (void)Tuple<StrongConst<std::size_t, Is>...>{};
+    (void)Tuple<StrongConst<size_t, Is>...>{};
 #endif
     return 0;
 }
 
-int main() {
-    return bench_tuple(n_pack); //
-}
+int main() { return bench_tuple(n_pack); }

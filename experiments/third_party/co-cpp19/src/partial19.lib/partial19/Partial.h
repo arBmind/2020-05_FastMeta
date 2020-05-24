@@ -134,12 +134,9 @@ public:
     template<class... Vs> static auto fromArgs(Vs&&... vs) -> Partial {
         auto bits = Bits{};
         (bits.setAt(index_of_map<StoredOf<Vs>, Map>), ...);
-        auto hasValue = [&](size_t i) {
-            return bits.at(i); //
-        };
+        auto hasValue = [&](size_t i) { return bits.at(i); };
         auto factory = [&]<class T>(Type<T>*, void* ptr) {
-            ((details::ConditionalPlacementNew<isSame(&type<T>, &type<StoredOf<Vs>>)>::apply((Vs &&) vs, ptr), 0),
-             ...); //
+            ((details::ConditionalPlacementNew<isSame(&type<T>, &type<StoredOf<Vs>>)>::apply((Vs &&) vs, ptr), 0), ...);
         };
         return fromFactory(hasValue, factory);
     }
