@@ -12,44 +12,43 @@ Product {
     Group {
         name: "IndexPack"
         files: [
+            "IndexPack.Join.h",
             "IndexPack.h",
-            "IndexPackFront.h",
-            "IndexPackJoin.h",
-            "IndexPackTail.h",
+            "IndexPackTemplate.Change.h",
             "IndexPackTemplate.h",
-            "ChangeIndexPackTemplate.h",
+            "index_pack.back.h",
+            "index_pack.back.test.cpp",
+            "index_pack.front.h",
+            "index_pack.front.test.cpp",
             "index_pack.h",
-            "index_pack_back_value.h",
-            "index_pack_front.h",
-            "index_pack_front_value.h",
-            "index_pack_tail.h",
-            "index_pack_to_array.h",
+            "index_pack.tail.h",
+            "index_pack.to_array.h",
+            "index_pack.to_array.test.cpp",
         ]
     }
     Group {
         name: "Type"
         files: [
             "RemoveReference.h",
+            "Type.Unwrap.h",
             "Type.h",
             "TypeAt.h",
-            "UnwrapType.h",
         ]
     }
     Group {
         name: "TypePack"
         files: [
-            "ChangeTypePackTemplate.h",
+            "TypePack.Front.h",
             "TypePack.h",
+            "TypePackTemplate.Change.h",
             "TypePackTemplate.h",
-            "type_pack.h",
-            "type_pack_front_type.h",
         ]
     }
 
     files: [
         "Unreachable.h",
         "isSame.h",
-        "nulltpr_to.h",
+        "nullptr_to.h",
     ]
 
     Export {

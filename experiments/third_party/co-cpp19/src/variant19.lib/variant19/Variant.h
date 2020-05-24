@@ -2,9 +2,9 @@
 #include "meta19/Index.h"
 #include "meta19/Type.h"
 #include "meta19/TypeAt.h"
+#include "meta19/TypePack.Front.h"
 #include "meta19/Unreachable.h"
 #include "meta19/index_pack.h"
-#include "meta19/type_pack_front_type.h"
 
 #include <memory>
 #include <new>
@@ -12,12 +12,12 @@
 
 namespace variant19 {
 
-using meta19::FrontType;
 using meta19::Index;
 using meta19::index_of_map;
 using meta19::index_pack;
 using meta19::IndexPack;
 using meta19::IndexTypeMap;
+using meta19::PackFront;
 using meta19::Type;
 using meta19::TypeAtMap;
 
@@ -108,7 +108,7 @@ private:
         enum : size_t {
             storage_size = details::constexprMaxOf<sizeof(Ts)...>(),
         };
-        using First = FrontType<Ts...>;
+        using First = PackFront<Ts...>;
         using WhichValue = typename Which::Value;
 
         WhichValue which{npos};

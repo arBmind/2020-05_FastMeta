@@ -1,3 +1,4 @@
+#include "Partial.equals.h"
 #include "Partial.h"
 
 #include <gtest/gtest.h>

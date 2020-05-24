@@ -13,6 +13,7 @@ template<class T> using ReferencedOf = decltype(referencedTypeOf(type<T>));
 template<class T> constexpr auto storedTypeOf(Type<T>*) -> T;
 template<class T> constexpr auto storedTypeOf(Type<T&>*) -> T;
 template<class T> constexpr auto storedTypeOf(Type<T&&>*) -> T;
+template<class T> constexpr auto storedTypeOf(Type<const T>*) -> T;
 template<class T> constexpr auto storedTypeOf(Type<const T&>*) -> T;
 template<class T> constexpr auto storedTypeOf(Type<const T&&>*) -> T;
 template<class T> using StoredOf = decltype(storedTypeOf(type<T>));

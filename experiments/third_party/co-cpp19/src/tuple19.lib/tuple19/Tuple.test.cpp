@@ -95,6 +95,8 @@ TEST(Tuple, ambigious) {
     // auto a1b = Ambiguous::fromArgs('c', 23, 32); // not allowed! - arguments are treated out of order!
     auto a2 = Ambiguous{'c', 23, 32};
 
+    (void)(a0);
+    (void)(a1);
     EXPECT_EQ((a2.at<1>()), 23);
     EXPECT_EQ((a2.at<2>()), 32);
 }

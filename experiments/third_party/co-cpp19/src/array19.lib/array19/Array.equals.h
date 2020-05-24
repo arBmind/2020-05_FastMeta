@@ -4,8 +4,8 @@
 
 namespace array19 {
 
-template<class A, class B, size_t AN, size_t BN> //
-constexpr bool operator==(const Array<A, AN>& a, const Array<B, BN>& b) {
+template<class T, size_t AN, size_t BN>
+constexpr bool operator==(const Array<T, AN>& a, const Array<T, BN>& b) noexcept {
     if constexpr (AN != BN)
         return false;
     else {
@@ -16,8 +16,8 @@ constexpr bool operator==(const Array<A, AN>& a, const Array<B, BN>& b) {
     }
 }
 
-template<class A, class B, size_t AN, size_t BN> //
-constexpr bool operator!=(const Array<A, AN>& a, const Array<B, BN>& b) {
+template<class T, size_t AN, size_t BN>
+constexpr bool operator!=(const Array<T, AN>& a, const Array<T, BN>& b) noexcept {
     return !(a == b);
 }
 

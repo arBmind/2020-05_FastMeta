@@ -1,5 +1,6 @@
 #pragma once
 #include "meta19/Index.h"
+#include "meta19/RemoveReference.h"
 #include "meta19/Type.h"
 
 #include <utility>
@@ -8,6 +9,7 @@ namespace tuple19 {
 
 using meta19::Index;
 using meta19::nullptr_to;
+using meta19::StoredOf;
 using meta19::Type;
 using meta19::type;
 
@@ -40,10 +42,10 @@ private:
 
         constexpr IndexedTuple(Ts&&... ts) : details::TupleEntry<Is, Ts>({std::move(ts)})... {}
 
-        template<class F> void visitAll(F&& f) const& {
+        template<class F> constexpr void visitAll(F&& f) const& {
             (void)((f(*static_cast<const details::TupleEntry<Is, Ts>*>(this)), ...));
         }
-        template<class F> void amendAll(F&& f) & {
+        template<class F> constexpr void amendAll(F&& f) & {
             (void)((f(*static_cast<details::TupleEntry<Is, Ts>*>(this)), ...)); //
         }
     };
@@ -61,7 +63,7 @@ public:
 
     template<class... Os> static constexpr auto fromArgs(Os&&... os) -> Tuple {
         auto res = Tuple{};
-        ((res.amendOf(type<std::remove_const_t<std::remove_reference_t<Os>>>) = std::forward<Os>(os)), ...);
+        ((res.amendOf(type<StoredOf<Os>>) = std::forward<Os>(os)), ...);
         return res;
     }
     template<class... Os> static constexpr auto fromTuple(const Tuple<Os...>& o) -> Tuple {
@@ -93,8 +95,8 @@ public:
         return details::amendEntryOf<O>(indexed);
     }
 
-    template<class F> void visitAll(F&& f) const& { indexed.visitAll(static_cast<F&&>(f)); }
-    template<class F> void amendAll(F&& f) & { indexed.amendAll(static_cast<F&&>(f)); }
+    template<class F> constexpr void visitAll(F&& f) const& { indexed.visitAll(static_cast<F&&>(f)); }
+    template<class F> constexpr void amendAll(F&& f) & { indexed.amendAll(static_cast<F&&>(f)); }
 };
 
 template<> struct Tuple<> {
