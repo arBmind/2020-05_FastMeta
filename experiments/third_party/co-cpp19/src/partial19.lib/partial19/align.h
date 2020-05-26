@@ -13,13 +13,4 @@ constexpr auto alignOffset(size_t align, size_t offset) -> size_t {
     return static_cast<size_t>((offset + align - 1) & ~(align - 1));
 }
 
-/// returns the ptr increased to be aligned for given align.
-/// proconditons:
-/// * align == 2^N - only supports 2^n alignments
-/// * align >= 1
-template<class T> auto alignPointer(size_t align, T* ptr) -> T* {
-    auto offset = reinterpret_cast<intptr_t>(ptr);
-    return reinterpret_cast<T*>(alignOffset(align, offset));
-}
-
 } // namespace partial19

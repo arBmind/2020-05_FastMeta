@@ -8,9 +8,8 @@
 #include "meta19/TypePack.h"
 #include "meta19/isSame.h"
 
-#include <new> // std::launder
+#include <new> // std::launder, operator new[], operator delete[]
 #include <stdint.h> // uint8_t
-#include <stdlib.h> // malloc
 
 namespace partial19 {
 
@@ -123,8 +122,12 @@ public:
         auto r = Partial{};
         auto size = storageSize(hasValue);
         if (!size) return r;
-        if constexpr (alignof(std::max_align_t) < max_align) size += max_align - alignof(std::max_align_t);
-        r.m_pointer = static_cast<uint8_t*>(malloc(size));
+        if constexpr (__STDCPP_DEFAULT_NEW_ALIGNMENT__ < max_align) {
+            r.m_pointer = static_cast<uint8_t*>(::operator new[](size, std::align_val_t{max_align}));
+        }
+        else {
+            r.m_pointer = new uint8_t[size];
+        }
         r.constructAll(hasValue, factory);
         return r;
     }
@@ -147,22 +150,22 @@ public:
     // precondition: which().at(I) == true
     template<size_t I>[[nodiscard]] auto at(Index<I>* = {}) const -> const TypeAtMap<I, Map>& {
         using T = TypeAtMap<I, Map>;
-        return *std::launder(reinterpret_cast<const T*>(alignPointer(max_align, m_pointer) + offsetAt(I)));
+        return *std::launder(reinterpret_cast<const T*>(m_pointer + offsetAt(I)));
     }
     template<size_t I>[[nodiscard]] auto amendAt(Index<I>* = {}) -> TypeAtMap<I, Map>& {
         using T = TypeAtMap<I, Map>;
-        return *std::launder(reinterpret_cast<T*>(alignPointer(max_align, m_pointer) + offsetAt(I)));
+        return *std::launder(reinterpret_cast<T*>(m_pointer + offsetAt(I)));
     }
 
     // returns the value of type T
     // precondition: which().of<T>() == true
     template<class T>[[nodiscard]] auto of(Type<T>* = {}) const -> const T& {
         constexpr size_t I = index_of_map<T, Map>;
-        return *std::launder(reinterpret_cast<const T*>(alignPointer(max_align, m_pointer) + offsetAt(I)));
+        return *std::launder(reinterpret_cast<const T*>(m_pointer + offsetAt(I)));
     }
     template<class T>[[nodiscard]] auto amendOf(Type<T>* = {}) -> T& {
         constexpr size_t I = index_of_map<T, Map>;
-        return *std::launder(reinterpret_cast<T*>(alignPointer(max_align, m_pointer) + offsetAt(I)));
+        return *std::launder(reinterpret_cast<T*>(m_pointer + offsetAt(I)));
     }
 
     // visit all initialized types stored in this Partial
@@ -170,7 +173,7 @@ public:
     template<class F> auto visitInitialized(F&& f) const {
         auto i = 0u;
         auto offset = size_t{};
-        auto ptr = alignPointer(max_align, m_pointer);
+        auto ptr = m_pointer;
         ((m_bits.at(i) ? (offset = alignOffset(alignof_ts[i], offset),
                           f(*std::launder(reinterpret_cast<const Ts*>(ptr + offset))),
                           offset += sizeof_ts[i],
@@ -181,7 +184,7 @@ public:
     template<class F> auto amendVisitInitialized(F&& f) {
         auto i = 0u;
         auto offset = size_t{};
-        auto ptr = alignPointer(max_align, m_pointer);
+        auto ptr = m_pointer;
         ((m_bits.at(i) ? (offset = alignOffset(alignof_ts[i], offset),
                           f(*std::launder(reinterpret_cast<Ts*>(ptr + offset))),
                           offset += sizeof_ts[i],
@@ -192,14 +195,21 @@ public:
 
 private:
     void destructAll() {
-        amendVisitInitialized([]<class T>(T& v) { v.~T(); });
-        free(m_pointer);
+        amendVisitInitialized([]<class T>(T & v) { v.~T(); });
+        if constexpr (__STDCPP_DEFAULT_NEW_ALIGNMENT__ < max_align) {
+            auto hasValue = [&](size_t i) { return m_bits.at(i); };
+            auto size = storageSize(hasValue);
+            ::operator delete[](m_pointer, size, std::align_val_t{max_align});
+        }
+        else {
+            delete[] m_pointer;
+        }
     }
 
     template<class HasValue, class Factory> auto constructAll(HasValue&& hasValue, Factory&& factory) {
         auto i = 0u;
         auto offset = size_t{};
-        auto ptr = alignPointer(max_align, m_pointer);
+        auto ptr = m_pointer;
         ((hasValue(i) ? (offset = alignOffset(alignof_ts[i], offset),
                          factory(type<Ts>, ptr + offset),
                          m_bits.setAt(i),
