@@ -16,12 +16,13 @@ template<class ElemStorage> struct DynamicStorage final {
     DynamicStorage() = default;
     ~DynamicStorage() noexcept { delete[] pointer; }
 
-    DynamicStorage(DynamicStorage&& o) noexcept : pointer(o.pointer), capacity(o.capacity) { o.pointer = 0; }
+    DynamicStorage(DynamicStorage&& o) noexcept : pointer(o.pointer), capacity(o.capacity) { o.pointer = {}; }
     DynamicStorage& operator=(DynamicStorage&& o) noexcept {
         delete[] pointer;
         pointer = o.pointer;
         capacity = o.capacity;
-        o.pointer = 0;
+        o.pointer = {};
+        return *this;
     }
 
     [[nodiscard]] static auto create(Capacity capacity) -> DynamicStorage {

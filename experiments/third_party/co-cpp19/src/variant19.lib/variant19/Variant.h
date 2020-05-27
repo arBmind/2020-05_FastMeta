@@ -8,7 +8,7 @@
 
 #include <memory>
 #include <new>
-#include <utility>
+#include <utility> // std::launder
 
 namespace variant19 {
 
