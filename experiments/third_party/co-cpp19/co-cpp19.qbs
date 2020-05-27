@@ -11,6 +11,7 @@ Project {
         "src/meta19.lib",
         "src/optional19.lib",
         "src/partial19.lib",
+        "src/serialize19.lib",
         "src/string19.lib",
         "src/strong19.lib",
         "src/tuple19.lib",
