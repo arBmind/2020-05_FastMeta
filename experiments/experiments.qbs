@@ -24,7 +24,7 @@ Project {
 
         Export {
             Depends { name: "cpp" }
-            cpp.cxxLanguageVersion: "c++2a"
+            cpp.cxxLanguageVersion: "c++17"
             // cpp.treatWarningsAsErrors: true
 
             Properties {
@@ -49,9 +49,13 @@ Project {
             }
         }
     }
+    // allow usage of some C++20 features already implemented by the major compilers
     Product {
         name: "cpp19"
         Export {
+            Depends { name: "cpp" }
+            cpp.cxxLanguageVersion: "c++2a"
+
             Depends { name: "cpp17" }
         }
     }
