@@ -22,3 +22,6 @@
 [submodule "experiments/third_party/mpark_variant"]
 	path = experiments/third_party/mpark_variant
 	url = https://github.com/mpark/variant
+[submodule "experiments/third_party/co-cpp19"]
+	path = experiments/third_party/co-cpp19
+	url = https://github.com/basicpp17/co-cpp19.git
