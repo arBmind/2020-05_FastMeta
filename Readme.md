@@ -6,6 +6,8 @@ Presentation for C++ Usergroup Dresden (13. Mai 2020)
 
 [![Youtube Recording of the Talk](http://img.youtube.com/vi/CmMRacxNIB4/0.jpg)](https://youtu.be/CmMRacxNIB4)
 
+[Interactive Slides](https://arbmind.github.io/2020-05_FastMeta/)
+
 ## Mentioned Links
 
 * [Metashell](http://metashell.org) - Clang based interactive shell
